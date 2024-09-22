@@ -1,52 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-	<title>Lise</title>
-	<meta charset="UTF-8">
-	<meta name="format-detection" content="telephone=no">
-	<!-- <style>body{opacity: 0;}</style> -->
-	<link rel="stylesheet" href="css/style.min.css?_v=20240917223814">
-	<link rel="shortcut icon" href="favicon.ico">
-	<!-- <meta name="robots" content="noindex, nofollow"> -->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Lise</title>
+  <meta charset="UTF-8">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="stylesheet" href="css/style.min.css?_v=20240917223814">
+  <link rel="shortcut icon" href="favicon.ico">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 </head>
-
 <body>
-	<div class="wrapper">
-		<main class="page">
-			<div class="loader">
-				<div class="content__container">
-					<div class="main__image">
-						<picture><source srcset="img/Lise_loader.webp" type="image/webp"><img src="img/Lise_loader.png" alt="image"></picture>
-					</div>
-					<div class="loader__inner">
-						<div class="loader__text">Загрузка...</div>
-						<progress class="loader__line" value="90" max="100"></progress>
-					</div>
-				</div>
-			</div>
-		</main>
-	</div>
-	<script src="js/app.min.js?_v=20240917223814"></script>
-	<script>document.addEventListener('DOMContentLoaded', function () {
-		const loadingScreen = document.querySelector('.loader');
-		const progressBar = document.querySelector('.loader__line');
-	  
-		let loadingProgress = 0;
-		const loadingInterval = setInterval(() => {
-		  loadingProgress += 10; // Скорость загрузки
-		  progressBar.value = loadingProgress;
-	  
-		  if (loadingProgress >= 100) {
-			clearInterval(loadingInterval);
-			// Убираем экран загрузки и переходим на main.html
-			loadingScreen.style.display = 'none';
-			window.location.href = 'main.html'; 
-		  }
-		}, 100); // Интервал обновления прогресса (мс)
-	  });
-	  </script>
-</body>
+  <script async src="https://telegram.org/js/telegram-widget.js?15" data-telegram-login="example_bot" data-size="large" data-onauth="onTelegramAuth(user)" data-request-access="write"></script>
+  <div class="wrapper">
+    <main class="page">
+      <div class="loader">
+        <div class="content__container">
+          <div class="main__image">
+            <picture><source srcset="img/Lise_loader.webp" type="image/webp"><img src="img/Lise_loader.png" alt="image"></picture>
+          </div>
+          <div class="loader__inner">
+            <div class="loader__text">Загрузка...</div>
+            <progress class="loader__line" value="90" max="100"></progress>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script>
+    function onTelegramAuth(user) {
+      localStorage.setItem('telegramId', user.id);
+      sendNote();
+    }
 
+    function sendNote() {
+      fetch('/notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-telegram-id': localStorage.getItem('telegramId')
+        },
+        body: JSON.stringify({
+          title: 'Заголовок заметки', 
+          text: 'Текст заметки'
+        })
+      })
+      .then(response => {
+        if (!response.ok) { 
+          throw new Error('Ошибка при отправке запроса');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Данные с сервера:', data);
+        window.location.href = 'main.html'; // Переход после успешного ответа
+      })
+      .catch(error => {
+        console.error('Произошла ошибка:', error);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const loadingScreen = document.querySelector('.loader');
+      const progressBar = document.querySelector('.loader__line');
+
+      let loadingProgress = 0;
+      const loadingInterval = setInterval(() => {
+        loadingProgress += 10; 
+        progressBar.value = loadingProgress;
+
+        if (loadingProgress >= 100) {
+          clearInterval(loadingInterval);
+          loadingScreen.style.display = 'none';
+        }
+      }, 100); 
+    });
+  </script>
+  <script src="js/app.min.js?_v=20240917223814"></script>
+</body>
 </html>
